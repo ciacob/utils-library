@@ -12,8 +12,17 @@
 package ro.ciacob.utils {
 
 	import flash.utils.ByteArray;
+	
+	import mx.utils.ObjectUtil;
 
 	public final class Arrays {
+		
+		
+ 		public static const FILTER_ANY : String = 'arraysFilterAny';
+		public static const FILTER_ALL : String = 'arraysFilterAll';
+		public static const FILTER_NONE : String = 'arraysFilterNone';
+		public static const FILTER_SUBSTRING : String = 'arraysFilterSubstring';
+		public static const INCLUDE_IF_ALL_KEYS_MISSING : String = 'arraysFilterIncludeIfAllKeysMissing';
 
 		private static const COLLECTION_TOO_SMALL_ERROR : String = 'Cannot extract a subset of %d element(s) from an Array of %d element(s).';
 
@@ -120,14 +129,27 @@ package ro.ciacob.utils {
 		 * @param	array The array to remove dupplicates from.
 		 */
 		public static function removeDuplicates (array : Array) : void {
-			// TODO: TEST THIS CODE
 			if (array != null && array.length > 0) {
 				var tmp : Array = array.concat ();
+				var objIndices : Array = [];
 				array.splice (0);
 				for (var i : int = 0; i < tmp.length; i++) {
 					var el : Object = tmp[i];
-					if (array.indexOf (el) == -1) {
-						array.push (el);
+					if (el.constructor && el.constructor == Object) {
+						var identicalObjects : Array = objIndices.filter (
+							function (objIndex : Object, i : int, arr: Array) : Boolean {
+								var objToTest : Object = (array [objIndex as int] as Object);
+								return (ObjectUtil.compare (el, objToTest) == 0);
+							}
+						);
+						if (identicalObjects.length == 0) {
+							array.push (el);
+							objIndices.push (array.length - 1);
+						}
+					} else {
+						if (array.indexOf (el) == -1) {
+							array.push (el);
+						}
 					}
 				}
 			}
@@ -197,6 +219,164 @@ package ro.ciacob.utils {
 				}
 			}
 			return true;
+		}
+		
+		/**
+		 * Returns an Array containing the intersection of two given Arrays, optionally filtering out dupplicates
+		 * from the returned output. Returns an empty Array if either of `a` or `b` is empty. Always sorts resulting
+		 * Array alphabetically.
+		 * 
+		 * IMPORTANT NOTE: Objects are ignored, unless they share the same instance. So, if both arrays have an
+		 * object literal of {red : 0xff0000}, it will NOT be includded in the result, whereas, if the object was
+		 * defined outside as `var myRed : Object = {red : 0xff0000}`, and then `myRed` includded in both arrays,
+		 * it will.
+		 * 
+		 * @param a First of the two Arrays 
+		 * @param b First of the two Arrays 
+		 * @param noDupplicates Flag to set to have a dupplicates free output 
+		 */
+		public static function intersect (a : Array, b : Array, noDupplicates : Boolean) : Array {
+			if (a.length == 0 || b.length == 0) {
+				return [];
+			}
+			var t : Array;
+			if (b.length > a.length) t = b, b = a, a = t; // swap to make sure "indexOf" runs over the shorter Array
+			var result : Array = a.filter (function (e : Object, i : int, c : Array) : Boolean {
+				return b.indexOf (e) > -1;
+			});
+			if (!noDupplicates) {
+				removeDuplicates (result);
+			}
+			result.sort();
+			return result;
+		}
+		
+		
+		/**
+		 * Returns a filtered version of given `source` Array; In order for an items to be included in the resulting 
+		 * Array it must pass the `condition` argument while also honouring any given `flags`.
+		 * 
+		 * @param	source
+		 * 			Must be an Array containing Objects, such as:
+		 * 
+		 * 			// Example 1
+		 * 			var source : Array = [
+		 *	 			{ name : "red", hex : 0xff0000 },
+		 * 				{ name : "green", hex : 0x00ff00 },
+		 * 				{ name : "blue", hex : 0x0000ff }
+		 * 			];
+		 * 
+		 * @param	condition
+		 * 			An Object containing the key(s) to be tested and one or more permitted values, such as:
+		 * 
+		 * 		   	// Example 2
+		 * 			var condition = {name: "red"} // Matches item at index `0` in previous Example 1
+		 * 
+		 * 		   	// Example 3
+		 * 			var condition = {name: ["red", "green"]} // Matches items at indices `0` and `1` in Example 1
+		 * 
+		 * @param	flags
+		 * 			Optional, a `rest` arguments containing directives that alter the overall behavior of the
+		 * 			filter. Currently, the following flags are supported (the order of flags definitions in this 
+		 * 			list also reflects the order they override each other, if ever the case):
+		 * 
+		 * 			// Matching mode flags
+		 * 			Arrays.FILTER_ANY - an item is includded if either of the keys in `condition` has a match;
+		 * 			Arrays.FILTER_ALL - an item is includded only if all of the keys in `condition` have matches (default);
+		 * 			Arrays.FILTER_NONE - an item is includded only if none of the keys in `condition` have a match;
+		 * 
+		 * 			// Misc. Flags
+		 * 			Arrays.FILTER_SUBSTRING - toggles substring matching for all string values in `condition` (false when missing);
+		 * 			Arrays.INCLUDE_IF_ALL_KEYS_MISSING - assumes "match" for all the items that do not have any of the keys in 
+		 * 			`condition`, at all (false when missing).
+		 * 
+		 * @return	A new, possible empty Array, containing the matching items.
+		 */
+		public static function filterObjectsArray (source : Array, condition : Object, ...flags) : Array {
+			var hasFilterAny : Boolean = (flags.indexOf (FILTER_ANY) >= 0);
+			var hasFilterAll : Boolean = (flags.indexOf (FILTER_ALL) >= 0);
+			var hasFilterNone : Boolean = (flags.indexOf (FILTER_NONE) >= 0);
+			var hasFilterSubstring : Boolean = (flags.indexOf (FILTER_SUBSTRING) >= 0);				
+			var hasIncludeIfAllKeysMissing : Boolean = (flags.indexOf (INCLUDE_IF_ALL_KEYS_MISSING) >= 0);
+			var matchingMode : String = hasFilterNone? FILTER_NONE : hasFilterAll? FILTER_ALL: hasFilterAny? FILTER_ANY: FILTER_ALL;
+			var numConditionCriteria : int = Objects.getKeys(condition).length;
+			
+			return source.filter (function (rawItem : *, index : int, array : Array) : Boolean {
+				var itemPasses : Boolean = false;
+				var matchesNum : int = 0;
+				var foundKeysNum : int = 0;
+				var item : Object = (rawItem as Object);
+				var conditionKey : String;
+				var conditionVal : Object;
+				var itemVal : Object;
+				var haveAltMatch : Boolean
+				for (conditionKey in condition) {
+					conditionVal = condition[conditionKey];
+					itemVal = null;
+					
+					if (conditionKey in item) {
+						foundKeysNum++;
+						itemVal = item[conditionKey];
+						
+						// If current condition's criteria value is an Array, any match against one of the values in that
+						// Array (if FILTER_ANY or FILTER_ALL is in effect) or no match against any of the values in that
+						// Array (if FILTER_NONE is in effect) will set the current item as passing.
+						if (conditionVal is Array) {
+							// treci prin conditionVal, care e un array, pentru fiecare conditionVal.searchValue fa:
+							// (itemVal as Array).indexOf (conditionVal.searchValue);
+							haveAltMatch = ((conditionVal as Array).indexOf (itemVal) >= 0);
+							if (haveAltMatch && (matchingMode == FILTER_ALL || matchingMode == FILTER_ANY)) {
+								matchesNum++;
+							}
+							if (!haveAltMatch && matchingMode == FILTER_NONE) {
+								matchesNum++;
+							}
+						} else {
+						
+							// FILTER_SUBSTRING flag effect
+							if (hasFilterSubstring && (conditionVal is String)) {
+								if ((itemVal is String) && (itemVal as String).indexOf(conditionVal) >= 0) {
+									matchesNum++;
+								}
+							} else {
+								
+								// Regular matching (no special case), using "==" for flexibility
+								if (conditionVal == itemVal) {
+									matchesNum++;
+								}
+							}
+						}
+					}
+					
+					// FILTER_* flags effect
+					if (matchingMode == FILTER_ANY) {
+						if (matchesNum > 0) {
+							itemPasses = true;
+							break;
+						}
+					} else if (matchingMode == FILTER_ALL) {
+						if (matchesNum == numConditionCriteria) {
+							itemPasses = true;
+							break;
+						}
+					} else if (matchingMode == FILTER_NONE) {
+						if (matchesNum == 0 && foundKeysNum == numConditionCriteria) {
+							itemPasses = true;
+							break;
+						}
+					}
+				}
+
+				// INCLUDE_IF_ALL_KEYS_MISSING flag effect
+				if (hasIncludeIfAllKeysMissing) {
+					if (foundKeysNum == 0) {
+						itemPasses = true;
+					}
+				}
+				
+				// If 'itemPasses' is true, the item will be includded
+				return itemPasses;
+			});
 		}
 	}
 }
