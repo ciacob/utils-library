@@ -1722,5 +1722,153 @@ package ro.ciacob.utils {
 			// Fallback
 			return match;
 		}
+		
+		
+		
+		
+		
+		/**
+		 * Parses a String containing Microsoft C style arguments into an array of Strings,
+		 * where each String contains only one argument. The following rules (copied from 
+		 * "https://msdn.microsoft.com/en-us/library/a1y7w461.aspx") were implemented and
+		 * thoroughly tested using the test cases there provided:
+		 * 
+		 * Arguments are delimited by white space, which is either a space or a tab.
+		 * 
+		 * A string surrounded by double quotation marks is interpreted as a single argument,
+		 * regardless of white space contained within. A quoted string can be embedded in an
+		 * argument. Note that the caret (^) is not recognized as an escape character or
+		 * delimiter.
+		 * 
+		 * A double quotation mark preceded by a backslash, \", is interpreted as a literal
+		 * double quotation mark (").
+		 * 
+		 * Backslashes are interpreted literally, unless they immediately precede a double
+		 * quotation mark.
+		 * 
+		 * If an even number of backslashes is followed by a double quotation mark, then one
+		 * backslash (\) is placed in the argv array for every pair of backslashes (\\), and
+		 * the double quotation mark (") is interpreted as a string delimiter.
+		 * 
+		 * If an odd number of backslashes is followed by a double quotation mark, then one
+		 * backslash (\) is placed in the argv array for every pair of backslashes (\\) and 
+		 * the double quotation mark is interpreted as an escape sequence by the remaining 
+		 * backslash, causing a literal double quotation mark (") to be placed in argv.
+		 * 
+		 * @param argsString
+		 * 		A string containing one or more arguments formatted according to the above
+		 * 		rules.
+		 * 
+		 * @param stripLeadingSlash
+		 * 		Whether to strip off the first character from EACH of the resulting arguments,
+		 * 		if it is a forward slash (/). Will leave the arguments untouched if a forward
+		 * 		slash is not present of EVERY resulting argument.
+		 * 
+		 * @param Individual arguments, as an Array of Strings
+		 */
+		public static function parseArgsMsCStyle (argsString : String, stripLeadingSlash : Boolean = false) : Array {
+			var ret : Array = [];
+			var currArgBuffer : Array = [];
+			var isInsideQuotedSequence : Boolean = false;
+			var numBackSlashes : int = 0;
+			for (var i : int = 0; i < argsString.length; i++) {
+				var c : String = argsString.charAt(i);
+				// A: we have a backslash
+				if (c == '\x5c') {
+					// If we are not inside of a quoted sequence, we count it as
+					// a control char
+					numBackSlashes++;
+				}
+					// B: we have anything else than a backslash
+				else {
+					// If we previously collected one or more backslashes, we need to handle them
+					if (numBackSlashes > 0) {
+						// We need to treat the collected backslashes differently, based on whether they
+						// are followed by a double quote, or not
+						if (c == '\x22') {
+							var numBackslashesToInsert : int = 0;
+							if (numBackSlashes % 2 == 0) {
+								// If we have collected an even number of backslashes
+								numBackslashesToInsert = (numBackSlashes / 2);
+								numBackSlashes = 0;
+							} else {
+								// If we have collected an odd number of backslashes
+								numBackslashesToInsert = ((numBackSlashes - 1) / 2);
+								numBackSlashes = 1;
+							}
+							while (numBackslashesToInsert > 0) {
+								currArgBuffer.push('\x5c');
+								numBackslashesToInsert--;
+							}
+						} else {
+							while (numBackSlashes > 0) {
+								currArgBuffer.push('\x5c');
+								numBackSlashes--;
+							}
+						}
+					}
+					// B.1: we have a double quote; we need to watch out for a preceeding backslash
+					if (c == '\x22') {
+						// If the double quote is not preceeded by a backslash, it will toggle
+						// the `isInsideQuotedSequence`flag state
+						if (numBackSlashes == 0) {
+							isInsideQuotedSequence = !isInsideQuotedSequence;
+						}
+							// otherwise, it will be includded into the current argument, as are 
+							// regular chars
+						else {
+							currArgBuffer.push(c);
+							numBackSlashes = 0;
+						}
+					}
+						// B.2: we have a whitespace; we need to watch out for being inside of a 
+						// quoted sequence
+					else if (c == '\x20') {
+						// If we are not inside of a quoted sequence, we reset counters 
+						// and seal and commit the current argument
+						if (!isInsideQuotedSequence) {
+							numBackSlashes = 0;
+							ret.push(currArgBuffer.join(''));
+							currArgBuffer.length = 0;
+						}
+							// otherwise, the whitespace will be includded into the current argument, as are 
+							// regular chars
+						else {
+							currArgBuffer.push(c);
+							numBackSlashes = 0;
+						}
+					} else {
+						// B.3: we have any other type of char; just include it into the current argument
+						currArgBuffer.push(c);
+						numBackSlashes = 0;
+					}
+				}
+			}
+			// Salvaging the argument comming after the last space
+			if (currArgBuffer.length > 0) {
+				ret.push(currArgBuffer.join(''));
+			}
+			// Stripping off the first char if (1) we were requested to do so, (2) it is a forward slash, and 
+			// (3) such a forward slash is found at the beginning of EACH of the resulting arguments
+			if (stripLeadingSlash) {
+				var strippedArgs : Array = [];
+				for (var j:int = 0; j < ret.length; j++) {
+					var arg : String = (ret[j] as String);
+					var firstChar : String = (arg.charAt(0) as String);
+					if (firstChar != '\x2f') {
+						strippedArgs = null;
+						break;
+					}
+					strippedArgs.push (arg.substr(1));
+				}
+				if (strippedArgs) {
+					return strippedArgs;
+				}
+			}
+			return ret;
+		}
+		
+		
+		
 	}
 }

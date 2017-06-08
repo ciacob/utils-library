@@ -5,6 +5,7 @@ package ro.ciacob.utils.constants {
 		public static const AUTO:String = "auto";
 		public static const CLICK:String = "click";
 		public static const COMMAND:String = "command";
+		public static const CONFIGURATION:String = "configuration";
 		public static const DETAILS:String = "details";
 		public static const EVENT:String = "event";
 		public static const FILE:String = "file";

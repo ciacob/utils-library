@@ -15,6 +15,7 @@ package ro.ciacob.utils.constants {
 		public static const ELLIPSIS:String = '…';
 		public static const LEFT_PAREN:String = '(';
 		public static const NEW_LINE:String = '\n';
+		public static const WIN_NEW_LINE:String = '\r\n';
 		public static const RETURN:String = '\r';
 		public static const PERCENT:String = '%';
 		public static const QUOTES:String = '"';

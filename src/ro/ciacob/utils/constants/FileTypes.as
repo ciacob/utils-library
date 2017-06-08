@@ -59,6 +59,7 @@ package ro.ciacob.utils.constants {
 		
 		// Windows shortcuts
 		public static const LNK:String = 'lnk';
+		public static const URL:String = 'url';
 
 		// Mac Executables
 		public static const SH:String = 'sh';
