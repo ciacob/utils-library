@@ -151,5 +151,21 @@ package ro.ciacob.utils {
 			}
 			return false;
 		}
+		
+		/**
+		 * Classical way of clonning an Object using native AMF serialization. Deemed to be the fastest
+		 * way of clonning an object. Will not work for DisplayObject sub-classes, or for instances of
+		 * classes that have mandatory constructor parameters. 
+		 * 
+		 * LIMITATIONS:
+		 * - does not preserve references;
+		 * - does not clone private members.
+		 */
+		public static function cloneObject (source : Object) : Object {
+			var b:ByteArray = new ByteArray();
+			b.writeObject(source);
+			b.position = 0;
+			return(b.readObject());
+		}
 	}
 }

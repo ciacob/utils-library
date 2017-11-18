@@ -1,8 +1,6 @@
 package ro.ciacob.utils {
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
-	
-	import spark.primitives.Rect;
 
 	public class Geometry {
 
@@ -68,7 +66,7 @@ package ro.ciacob.utils {
 		}
 
 		/**
-		 * TODO: document
+		 * Given an object with `x`, `y`, `width` and `height` properties, returns a matching Rectangle.
 		 */
 		public static function objectToRectangle(obj:Object):Rectangle {
 			if (obj != null) {
@@ -94,7 +92,8 @@ package ro.ciacob.utils {
 		}
 
 		/**
-		 * TODO: document
+		 * Does the opposite of `objectToRectangle`, producing a simple Object with given Rectangles's
+		 * `x`, `y`, `width` and `height` properties.
 		 */
 		public static function rectangleToObject(rect:Rectangle):Object {
 			if (rect != null) {

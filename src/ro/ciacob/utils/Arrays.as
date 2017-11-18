@@ -27,7 +27,7 @@ package ro.ciacob.utils {
 		private static const COLLECTION_TOO_SMALL_ERROR : String = 'Cannot extract a subset of %d element(s) from an Array of %d element(s).';
 
 		/**
-		 * Adds all given arguments as members of an array, then returns the arrays. Any arrays given
+		 * Adds all given arguments as members of an array, then returns the array. Any arrays given
 		 * as members, to any level deep, are flatten out, that is, their members are added instead
 		 * of the parent Array.
 		 */

@@ -3,6 +3,7 @@ package ro.ciacob.utils {
 		public static const ALL_EXCEPT_FILENAME_UNSAFE:String = '^/:*?"<>|\\\\';
 		public static const REJECT_QUOTES_APOSTROPHE_BACKTICK:String = '^\x22\x27\x60';
 		public static const REJECT_QUOTES_BACKTICK:String = '^\x22\x60';
+		public static const REJECT_BROKEN_BAR:String = '^¦';
 		public static const ALPHA_LOWER:String = 'a-z';
 		public static const ALPHA_NUM_LOWER:String = '0-9a-z';
 		public static const ALPHA_NUM_UPPER:String = '0-9A-Z';
@@ -22,5 +23,6 @@ package ro.ciacob.utils {
 		public static const WINDOWS_VALID_FILE_NAME:RegExp = /^[^\\\/\:\*\?\"<>\|]+$/;
 		public static const NUMERIC_HTML_ENTITY_GLOBAL:RegExp = /\&\#(\d{1,})\;/g;
 		public static const GENERIC_HTML_ENTITY_GLOBAL:RegExp = /\&\#?([\da-z]{1,})\;/gi;
+		public static const UUID_CASE_INSENSITIVE:RegExp = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 	}
 }
