@@ -1,5 +1,8 @@
 package ro.ciacob.utils {
+	import flash.net.registerClassAlias;
 	import flash.utils.ByteArray;
+	
+	import avmplus.getQualifiedClassName;
 
 	public class ByteArrays {
 
@@ -162,10 +165,17 @@ package ro.ciacob.utils {
 		 * - does not clone private members.
 		 */
 		public static function cloneObject (source : Object) : Object {
-			var b:ByteArray = new ByteArray();
-			b.writeObject(source);
-			b.position = 0;
-			return(b.readObject());
+			if (source) {
+				var srcClass : Class = source.constructor;
+				var srcAlias : String = getQualifiedClassName(srcClass);
+				registerClassAlias(srcAlias, srcClass);
+				var b:ByteArray = new ByteArray();
+				b.writeObject(source);
+				b.position = 0;
+				var clone:Object = b.readObject();
+				return clone;
+			}
+			return null;			
 		}
 	}
 }
