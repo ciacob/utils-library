@@ -1,8 +1,4 @@
 package ro.ciacob.utils {
-	import flashx.textLayout.conversion.ConversionType;
-	import flashx.textLayout.conversion.TextConverter;
-	import flashx.textLayout.elements.TextFlow;
-	
 	import ro.ciacob.utils.constants.CommonStrings;
 	import ro.ciacob.utils.constants.HtmlEntities;
 	import ro.ciacob.utils.constants.HtmlEntity;
@@ -22,7 +18,6 @@ package ro.ciacob.utils {
 	 */
 	public class Strings {
 		
-		public static const TEXTFLOW_OPENING_TAG : String = '<TextFlow';
 
 		public static const DEFAULT_UIDS_POOL:Object = {};
 
@@ -75,19 +70,6 @@ package ro.ciacob.utils {
 				}
 			}
 			return ret;
-		}
-		
-		/**
-		 * Takes a string and removes TLF markup from it where applicable. Leaves untouched Flash HTML markup and plain text.
-		 * @param markup A string to look for, and purge of TLF markup.
-		 * 
-		 * @return Plain text, if the string contained TLF markup; the original string otherwise.
-		 */
-		public static function ensureNoTLF (markup : String) : String {
-			if (Strings.contains(markup, TEXTFLOW_OPENING_TAG)) {
-				return Strings.tlfMarkupToText (markup);
-			}
-			return markup;
 		}
 
 		/**
@@ -968,42 +950,6 @@ package ro.ciacob.utils {
 			}
 			return p_string.replace(/(\w)/, _swapCase);
 		}
-
-		/**
-		 * Similar to `tlfMarkupToText`, but yelds the TextField's proprietary HTML format instead.
-		 * @see tlfMarkupToText()
-		 */
-		public static function tlfMarkupToHTML(markup:String, numPeelLevels:int = 0):String {
-			var flow:TextFlow = TextConverter.importToFlow(markup, TextConverter.TEXT_LAYOUT_FORMAT);
-			if (flow != null) {
-				var text:String = (TextConverter.export(flow, TextConverter.TEXT_FIELD_HTML_FORMAT,
-					ConversionType.STRING_TYPE) as String);
-				
-				if (numPeelLevels > 0) {
-					var xml:XML;
-					try {
-						XML.ignoreWhitespace = true;
-						XML.ignoreComments = true;
-						XML.ignoreProcessingInstructions = true;
-						xml = XML(text);
-						while (numPeelLevels > 0) {
-							if (xml.children().length() > 1) {
-								break;
-							}
-							xml = xml.children()[0];
-							numPeelLevels--;
-						}
-						text = xml.toXMLString();
-						text = Strings.removeNewLines(text);
-					} catch (e:Error) {
-						//trace('Strings::tlfMarkupToHTML() - cannot create XML object
-						//from `', text, '`.');
-					}
-				}
-				return trim(text);
-			}
-			return markup;
-		}
 		
 		/**
 		 * Peels given HTML-like markup, i.e., remove outer tags that fully encompass the content. 
@@ -1050,30 +996,6 @@ package ro.ciacob.utils {
 				}
 			}
 			return output;
-		}
-
-		/**
-		 * Strips formatting information from a give TLF markup, yelding unformatted text.
-		 * Returns an empty string if conversion fails.
-		 *
-		 * @param	markup
-		 * 			The markup to be converted. Conversion is done via the TextConverter
-		 * 			class.
-		 *
-		 * @return	The plain text in the given markup, if the conversion succeeds;
-		 * 			or, the original text, if the given markup IS NOT a valid TLF markup;
-		 * 			or, an empty string, if the given markup IS a valid TLF markup, but
-		 * 			conversion fails.
-		 * @see flashx.textLayout.conversion.TextConverter
-		 */
-		public static function tlfMarkupToText(markup:String):String {
-			var flow:TextFlow = TextConverter.importToFlow(markup, TextConverter.TEXT_LAYOUT_FORMAT);
-			if (flow != null) {
-				var text:String = (TextConverter.export(flow, TextConverter.PLAIN_TEXT_FORMAT,
-					ConversionType.STRING_TYPE) as String);
-				return trim(text);
-			}
-			return markup;
 		}
 
 		/**

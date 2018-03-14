@@ -1,6 +1,7 @@
 package ro.ciacob.utils.constants {
 
 	public final class CommonStrings {
+		public static const AT:String = '@';
 		public static const HASH:String = '#';
 		public static const EMPTY:String = '';
 		public static const COLON_SPACE:String = ': ';

@@ -57,6 +57,11 @@ package ro.ciacob.utils {
 			_dateFormatter.formatString = TIMESTAMP_DEFAULT;
 			return _dateFormatter.format (now);
 		}
+		
+		public static function get shortTimestamp () : String {
+			_dateFormatter.formatString = COUNTER_FORMAT;
+			return _dateFormatter.format (now);
+		}
 
 		public static function toDefaultFormat (time : *) : String {
 			if (time is String) {
