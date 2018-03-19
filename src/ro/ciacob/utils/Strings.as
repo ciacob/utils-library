@@ -96,6 +96,13 @@ package ro.ciacob.utils {
 			idx += p_char.length;
 			return p_string.substr(idx);
 		}
+		
+		/**
+		 * Returns given string pluralized by English grammar rules
+		 */
+		public static function pluralize (p_string : String) : String {
+			return Inflect.pluralize(p_string);
+		}
 
 		/**
 		 *	Returns everything after the last occurence of the provided character in p_string.
