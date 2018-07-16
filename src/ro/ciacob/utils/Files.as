@@ -1,7 +1,7 @@
 package ro.ciacob.utils
 {
 	import flash.filesystem.File;
-
+	
 	import ro.ciacob.utils.constants.FileTypes;
 
 	public final class Files
@@ -144,44 +144,38 @@ package ro.ciacob.utils
 		 * 			A list of other extensions that will be considered as good as the new one; if the file already
 		 * 			has any of those extensions, no change will be made. This parameter is optional.
 		 *
+		 * @param	append
+		 * 			If `true`, will append the correct extension to the file name instead of trying to detect and
+		 * 			replace a bogus extension. Has the disadvantage of creating file names like "file.gif.jpeg"
+		 * 			but has the advantage of always allowing dots in file names. Defaults to `false`.		
+		 *  
 		 * @return	A new file object, with the new extension. There is no guarantee that this file exists.
 		 */
-		public static function changeFileExtension(file:File, extension:String, acceptedAlternatives:Array=null):File
-		{
-			if (file != null && !file.isDirectory)
-			{
+		public static function changeFileExtension(file:File, extension:String, acceptedAlternatives:Array=null, append : Boolean = false):File {
+			if (file != null && !file.isDirectory) {
 				extension=Strings.trim(extension);
-				if (!Strings.isEmpty(extension))
-				{
+				if (!Strings.isEmpty(extension)) {
 					var isCurrentExtensionOk:Boolean=false;
 					var currentFileExtension:String=file.extension;
-					if (currentFileExtension != null)
-					{
-						if (acceptedAlternatives != null)
-						{
+					if (currentFileExtension != null) {
+						if (acceptedAlternatives != null) {
 							currentFileExtension=currentFileExtension.toLowerCase();
-							for (var i:int=0; i < acceptedAlternatives.length; i++)
-							{
+							for (var i:int=0; i < acceptedAlternatives.length; i++) {
 								var alternativeExtension:String=Strings.trim(acceptedAlternatives[i]);
 								alternativeExtension=alternativeExtension.toLowerCase();
-								if (currentFileExtension == alternativeExtension)
-								{
+								if (currentFileExtension == alternativeExtension) {
 									isCurrentExtensionOk=true;
 									break;
 								}
 							}
 						}
 					}
-					if (!isCurrentExtensionOk)
-					{
+					if (!isCurrentExtensionOk) {
 						var path:String;
-						if (currentFileExtension != null)
-						{
+						if (!append && currentFileExtension != null) {
 							var pattern:RegExp=new RegExp('\\.' + Strings.escapePattern(file.extension) + '$');
 							path=file.nativePath.replace(pattern, '.' + extension);
-						}
-						else
-						{
+						} else {
 							path=file.nativePath + '.' + extension;
 						}
 						file=new File(path);

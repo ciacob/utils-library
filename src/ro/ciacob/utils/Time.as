@@ -24,6 +24,8 @@ package ro.ciacob.utils {
 		public static const DEFAULT_SPLASH_TIME : Number = 3;
 		public static const LONG_DURATION : Number = 1400;
 		public static const SHORT_DURATION : Number = 550;
+		public static const VERY_SHORT_DURATION : Number = 250;
+		public static const INSTANTLY : Number = 100;
 		public static const TIMESTAMP_DEBUG_HEADER : String = 'YYYY/MM/DD JJ:NN:SS';
 		public static const TIMESTAMP_DEBUG_INLINE : String = 'JJ:NN:SS';
 		public static const TIMESTAMP_DEFAULT : String = 'D MMM YYYY, J:NN';
