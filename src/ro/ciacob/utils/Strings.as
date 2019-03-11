@@ -43,6 +43,13 @@ package ro.ciacob.utils {
 		}
 		
 		/**
+		 * Deprecated function, added here to keep old dependent code from breaking.
+		 */
+		public static function ensureNoTLF (text : String) : String {
+			return text;
+		}
+		
+		/**
 		 * Adds a string to each element in a list of (other) strings. By default unshifts the new string
 		 * on top of existing values, with no intervening space. An optional function can be passed in to 
 		 * change that. It will receive the stamp and the current element (Strings), and should produce the 
