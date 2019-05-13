@@ -37,6 +37,8 @@ package ro.ciacob.utils.constants {
 		public static const AMPERSAND : String = '&';
 		public static const SEMICOLON : String = ';';
 		public static const QUESTION_MARK : String = '?';
+		public static const EQUAL : String = '=';
+		public static const PIPE : String = '|';
 		
 		public static const OR : String = 'or';
 		public static const AND : String = 'and';
