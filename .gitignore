@@ -1,2 +1,10 @@
 
 .DS_Store
+.actionScriptProperties
+.flexLibProperties
+.FlexUnitSettings/FlexUnitApplicationLastRun.xml
+.project
+.settings/org.eclipse.core.resources.prefs
+bin/FlexUnitApplication-app.xml
+bin/FlexUnitApplication.swf
+bin/utils-library.swc
