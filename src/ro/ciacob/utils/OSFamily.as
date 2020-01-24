@@ -1,6 +1,5 @@
 package ro.ciacob.utils {
 	import flash.system.Capabilities;
-	import mx.messaging.messages.ISmallMessage;
 
 	public final class OSFamily {
 		public static const LINUX:String = 'linux';

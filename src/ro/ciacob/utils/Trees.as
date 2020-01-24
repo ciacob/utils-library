@@ -77,15 +77,19 @@ package ro.ciacob.utils {
 		public static function highlightTreeItem(tree:Tree, item:Object, delay:Number = 0.5, callback:Function =
 			null, callbackContext:Object = null):void {
 			Time.delay(delay, function():void {
-				tree.selectedItem = item;
-				if (item != null) {
-					tree.scrollToIndex (tree.selectedIndex);
-				}
-				if (callback != null) {
-					if (callbackContext == null) {
-						callbackContext = {};
+				try {
+					tree.selectedItem = item;
+					if (item != null) {
+						tree.scrollToIndex (tree.selectedIndex);
 					}
-					callback.apply(callbackContext);
+					if (callback != null) {
+						if (callbackContext == null) {
+							callbackContext = {};
+						}
+						callback.apply(callbackContext);
+					}
+				} catch (e : Error) {
+					trace ('Trees.highlightTreeItem crash: ' + e.message);
 				}
 			});
 		}
