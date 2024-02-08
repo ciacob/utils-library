@@ -62,65 +62,69 @@ package ro.ciacob.utils {
 			return (myBA.readObject () as Array);
 		}
 
-		/**
-		 * Extracts and returns a subset of a given collection. The subset may, or may not be
-		 * comprised of unique elements, based on the `uniqueElements` setting.
-		 *
-		 * @param collection The originating collection.
-		 * @param size The size of the subset.
-		 * @param uniqueElements Whether each element must appear only once in the returned subset.
-		 *         Optional, defults to `true`.
-		 *
-		 * @throws `COLLECTION_TOO_SMALL_ERROR`, if requesting a subset greater than the collection,
-		 *         while requiring that all items be unique.
-		 */
-		public static function getSubsetOf (collection : Array, size : uint,
-			uniqueElements : Boolean = true) : Array {
+	   /**
+	     * Extracts and returns a subset of a given collection. The subset may, or may not be
+	     * comprised of unique elements, based on the `uniqueElements` setting.
+	     *
+	     * @param collection The originating collection.
+	     * @param size The size of the subset.
+	     *
+	     * @param uniqueElements Whether each element must appear only once in the returned subset.
+	     *         Optional, defults to `true`.
+	     *
+	     * @param workOnSource
+	     *        Optional, default `false`. Only relevant when `uniqueElements` is `true`.
+	     *        If engaged, modifies the original collection by removing from it the values that got
+	     *        picked. When this argument is `true`, the `COLLECTION_TOO_SMALL_ERROR` error
+	     *        mechanism is suppressed, and the error will not fire, not even in legit scenarios.
+	     *
+	     * @throws `COLLECTION_TOO_SMALL_ERROR`, if requesting a subset greater than the collection,
+	     *         with all items in it unique.
+	     */
+	    public static function getSubsetOf(collection:Array, size:uint,
+	                                       uniqueElements:Boolean = true, workOnSource:Boolean = false):Array {
 
-			var src : Array = collection.concat ();
-			var srcSize : uint = src.length;
-			var srcLimit : uint = 0;
-
-			var dest : Array = [];
-			var destSize : uint = 0;
-
-			var randIndex : uint = 0;
-			var randElement : Object = null;
-
-			if (size > srcSize && uniqueElements == true) {
-				throw(new Error (Strings.sprintf (COLLECTION_TOO_SMALL_ERROR, size, srcSize)));
-			}
-
-			while ((destSize = dest.length) < size) {
-				srcLimit = (srcSize - 1);
-				randIndex = NumberUtil.getRandomInteger (0, srcLimit);
-				randElement = (src[randIndex] as Object);
-				dest.push (randElement);
-				if (uniqueElements) {
-					src.splice (randIndex, 1);
-					srcSize = (src.length);
-				}
-			}
-
-			return dest;
-		}
-		
-		/**
-		 * Convenience way to obtain a random element from a given Array. Whether the Array is modified
-		 * depends on the `remove` parameter.
-		 * 
-		 * @param collection The originating Array.
-		 * 
-		 * @param remove Optional. If set to `true`, the picked item will be removed in-place from `collection`.
-		 * 
-		 * return An Object randomly picked from `collection`, or `null` if `collection` is empty or null.
-		 */
-		public static function getRandomItem (collection : Array, remove : Boolean = false) : Object {
-			if (!collection || collection.length == 0) {
-				return null;
-			}
-			return (getSubsetOf (collection, 1, remove)[0] as Object);
-		}
+	        var src:Array = workOnSource ? collection : collection.concat();
+	        var srcSize:uint = src.length;
+	        var srcLimit:uint = 0;
+	        var dest:Array = [];
+	        var destSize:uint = 0;
+	        var randIndex:uint = 0;
+	        var randElement:Object = null;
+	        if (!workOnSource) {
+	            if (size > srcSize && uniqueElements == true) {
+	                throw(new Error(Strings.sprintf(COLLECTION_TOO_SMALL_ERROR, size, srcSize)));
+	            }
+	        }
+	        while ((destSize = dest.length) < size) {
+	            srcLimit = (srcSize - 1);
+	            randIndex = NumberUtil.getRandomInteger(0, srcLimit);
+	            randElement = (src[randIndex] as Object);
+	            dest.push(randElement);
+	            if (uniqueElements) {
+	                src.splice(randIndex, 1);
+	                srcSize = (src.length);
+	            }
+	        }
+	        return dest;
+	    }
+			
+	    /**
+	     * Convenience way to obtain a random element from a given Array. Whether the Array is modified
+	     * depends on the `remove` parameter.
+	     *
+	     * @param collection The originating Array.
+	     *
+	     * @param remove Optional. If set to `true`, the picked item will be removed in-place from `collection`.
+	     *
+	     * return An Object randomly picked from `collection`, or `null` if `collection` is empty or null.
+	     */
+	    public static function getRandomItem(collection:Array, remove:Boolean = false):Object {
+	        if (!collection || collection.length == 0) {
+	            return null;
+	        }
+	        return (getSubsetOf(collection, 1, remove, true)[0] as Object);
+	    }
 
 		/**
 		 * Removes a single dupplicate from "array", modifying the Array in place, and without

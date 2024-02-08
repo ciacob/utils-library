@@ -1,0 +1,1 @@
+Library providing a very broad selection of static utilities such as String and Array manipulation, color management, math, drawing, etc.
