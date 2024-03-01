@@ -36,8 +36,11 @@ package ro.ciacob.utils {
 
 		private static var _dateFormatter : DateFormatter = new DateFormatter;
 
-		public static function advancedDelay (action : Function, context : Object, milliseconds : int =
-			DEFAULT_DELAY_TIME, ... parameters : Array) : void {
+		public static function advancedDelay (
+				action : Function,
+				context : Object,
+				milliseconds : int = DEFAULT_DELAY_TIME,
+				... parameters : Array) : void {
 			var timer : Timer = new Timer (milliseconds, 1);
 			var tmp : Function = function (event : TimerEvent) : void {
 				timer.removeEventListener (TimerEvent.TIMER_COMPLETE, tmp);

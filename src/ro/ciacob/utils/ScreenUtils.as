@@ -1,7 +1,6 @@
 package ro.ciacob.utils {
 import com.adobe.crypto.MD5;
 
-import flash.display.DisplayObject;
 import flash.display.Screen;
 import flash.geom.Point;
 import flash.geom.Rectangle;
@@ -33,7 +32,7 @@ public class ScreenUtils {
                 break;
         }
         if (keepInVisibleArea) {
-            var screenVisible:Rectangle = flash.display.Screen.mainScreen.visibleBounds;
+            var screenVisible:Rectangle = Screen.mainScreen.visibleBounds;
             if (!screenVisible.containsRect(bounds)) {
                 if (bounds.x < screenVisible.x) {
                     bounds.x = screenVisible.x;
@@ -53,8 +52,8 @@ public class ScreenUtils {
     }
 
     public static function get taskBarPosition():String {
-        var screenFull:Rectangle = flash.display.Screen.mainScreen.bounds;
-        var screenVisible:Rectangle = flash.display.Screen.mainScreen.visibleBounds;
+        var screenFull:Rectangle = Screen.mainScreen.bounds;
+        var screenVisible:Rectangle = Screen.mainScreen.visibleBounds;
         if (screenVisible.top > screenFull.top) {
             return SCREEN_TOP;
         }
@@ -70,10 +69,10 @@ public class ScreenUtils {
         return NOT_FOUND;
     }
 
-    public static function getScreenForPoint(point:Point):flash.display.Screen {
-        var screen:flash.display.Screen = null;
+    public static function getScreenForPoint(point:Point):Screen {
+        var screen:Screen = null;
         var screenBounds:Rectangle = null;
-        var screens:Array = flash.display.Screen.screens;
+        var screens:Array = Screen.screens;
         for each (screen in screens) {
             screenBounds = screen.bounds;
             if (screenBounds.contains(point.x, point.y)) {
@@ -84,73 +83,7 @@ public class ScreenUtils {
     }
 
     public static function get mainScreenAvailableHeight():Number {
-        return flash.display.Screen.mainScreen.visibleBounds.height;
-    }
-
-    /**
-     * Gets the current flash.display.Screen based on the bounds of given DisplayObject,
-     * then returns its available bounds. If `compensateScalingFactor` is true, adjusts
-     * these bounds to represent the same area as on a non scaled screen (has no detrimental
-     * effects if screen is not scaled).
-     * Note that you would NOT want to turn `compensateScalingFactor` on, unless
-     * "requestedDisplayResolution" is set to "high" in the application's XML descriptor.
-     *
-     * @param    elementOnStage
-     *            A DisplayObject that is currently on stage. This method
-     *            will return `null` if the object is not on stage yet.
-     *
-     * @param    compensateScalingFactor
-     *            Whether to compensate (usually shrink) the obtained bounds
-     *            so that the returned area would be the same on scaled up
-     *            screens, as it is on non scaled-up screens. Default false.
-     *
-     * @param     elBounds
-     *            Precalculated element bounds. If not given, they will be inferred
-     *            from given "elementOnStage", via DisplayObject's "getBounds()" method.
-     *            Useful for the situation where "getBounds()" yelds unreliable results.
-     *
-     * @return    The available area of the Screen the given `elementOnStage`
-     *            is currently on. Returns `null` if the element is itself null, or
-     *            is not (yet) on the Stage. Also returns `null` if the element is
-     *            completely offscreen.
-     */
-    public static function getAvailableScreenBoundsFor(elementOnStage:DisplayObject,
-                                                       compensateScalingFactor:Boolean = false,
-                                                       elBounds:Rectangle = null):Rectangle {
-
-        if (!elementOnStage || !elementOnStage.stage) {
-            return null;
-        }
-        if (!elBounds) {
-            elBounds = elementOnStage.getBounds(elementOnStage.stage);
-        }
-        var match:Object = {elScreen: null};
-
-        // Try element's top-left, center, and bottom-right, in this order; return first found screen.
-        var localTl:Point = new Point(elBounds.x, elBounds.y);
-        var localCenter:Point = new Point(elBounds.x + elBounds.width / 2, elBounds.y + elBounds.height / 2);
-        var localBr:Point = new Point(elBounds.right, elBounds.bottom);
-        ([localTl, localCenter, localBr]).forEach(function (point:Point, ...rest):void {
-            if (!match.elScreen) {
-                var elGlobalPoint:Point = elementOnStage.localToGlobal(point);
-                match.elScreen = getScreenForPoint(elGlobalPoint);
-            }
-        });
-        if (!match.elScreen) {
-            return null;
-        }
-        var screenBounds:Rectangle = (match.elScreen as flash.display.Screen).visibleBounds;
-        if (compensateScalingFactor) {
-            var screenScaleFactor:Number = elementOnStage.stage.contentsScaleFactor;
-            if (screenScaleFactor != 1) {
-                var reversedFactor:Number = NumberUtil.getReversedFactor(screenScaleFactor);
-                screenBounds.x *= reversedFactor;
-                screenBounds.y *= reversedFactor;
-                screenBounds.width *= reversedFactor;
-                screenBounds.height *= reversedFactor;
-            }
-        }
-        return screenBounds;
+        return Screen.mainScreen.visibleBounds.height;
     }
 
     /**
@@ -174,13 +107,19 @@ public class ScreenUtils {
      * - toString: A function that returns a string representation of the screen, including
      *   its dimensions, position, and UID.
      *
-     *   Note: if not empty, the returned Array is guaranteed to have the main display at index `0`.
+     *   Notes:
+     *   (1) if not empty, the returned Array is guaranteed to have the main display at index `0`.
+     *   (2) minimum available width and minimum available height, across all screens, and after compensating for
+     *   any scale factors found, will be retained as "minW" and "minH", which will be available as statical properties
+     *   on the returned Array.
      */
     public static function getScreensInfo():Array {
         var mainScreen:Screen = Screen.mainScreen;
         var mainScreenBounds:Rectangle = mainScreen.bounds;
         var screens:Array = Screen.screens;
         var screensInfo:Array = [];
+        var minW:Number = NaN;
+        var minH:Number = NaN;
         for each (var screen:Screen in screens) {
 
             // There is a bug in the runtime: (screen === Screen.mainScreen) returns `false` .
@@ -190,8 +129,21 @@ public class ScreenUtils {
             var y:Number = bounds.y;
             var w:Number = bounds.width;
             var h:Number = bounds.height;
-            var uid:String = MD5.hash((isMainScreen ? 'm' : '') + 'w' + w + 'h' + h + 'x' + x + 'y' + y)
+            var s : Number = screen.contentsScaleFactor;
+            var uid:String = MD5.hash((isMainScreen ? 'm' : '') + 's' + s + 'w' + w + 'h' + h + 'x' + x + 'y' + y)
                     .substr(-7);
+            if (s != 1) {
+                x = Math.floor (x/s);
+                y = Math.floor (y/s);
+                w = Math.floor (w/s);
+                h = Math.floor (h/s);
+            }
+            if (isNaN(minW) || w < minW) {
+                minW = w;
+            }
+            if (isNaN(minH) || h < minH) {
+                minH = h;
+            }
             var info:Object = {
                 "uid": uid,
                 "isMain": isMainScreen,
@@ -199,11 +151,14 @@ public class ScreenUtils {
                 "y": y,
                 "width": w,
                 "height": h,
+                "scale": s,
                 "toString": function ():String {
                     return (
                         (this.isMain ? '[Main] ' : '') +
-                        this.width + 'x' + this.height + ' @ ' +
-                        this.x + ':' + this.y + " | " + this.uid
+                        this.width + 'x' + this.height + '@ ' +
+                        this.x + ':' + this.y +
+                        ' [' + this.scale + ':1]' +
+                        " | " + this.uid
                     );
                 }
             };
@@ -213,8 +168,13 @@ public class ScreenUtils {
                 screensInfo.push(info);
             }
         }
+        if (!isNaN(minW)) {
+            screensInfo.minW = minW;
+        }
+        if (!isNaN(minH)) {
+            screensInfo.minH = minH;
+        }
         return screensInfo;
     }
-
 }
 }
