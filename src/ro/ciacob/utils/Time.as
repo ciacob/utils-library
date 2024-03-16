@@ -1,14 +1,3 @@
-/*//////////////////////////////////////////////////////////////////*/
-/*                                                                  */
-/*   Unless stated otherwise, all work presented in this file is    */
-/*   the intelectual property of:                                   */
-/*   @author Claudius Iacob <claudius.iacob@gmail.com>              */
-/*                                                                  */
-/*   All rights reserved. Obtain written permission from the author */
-/*   before using/reusing/adapting this code in any way.            */
-/*                                                                  */
-/*//////////////////////////////////////////////////////////////////*/
-
 package ro.ciacob.utils {
 
 	import flash.events.TimerEvent;
@@ -97,7 +86,7 @@ package ro.ciacob.utils {
 		 * returns the Boolean `true`, or the `timeOut` period gets through. If a `true` value is received in due time,
 		 * polling is stopped and the `thenProceed` function is called.
 		 * 
-		 * Usefull when you cannot use events, or they don't work (as advertised, or at all).
+		 * Useful when you cannot use events, or they don't work (as advertised, or at all).
 		 * 
 		 * @param conditionIsTrue Function that must be return Boolean `false` for as long as we need to keep polling.
 		 * 
@@ -119,7 +108,7 @@ package ro.ciacob.utils {
 			
 			if (conditionIsTrue != null) {
 				
-				var numRepeats : uint = 0;
+				var numRepeats : uint;
 				var t : Timer = null;
 				
 				var checkIt : Function = function () : void {
