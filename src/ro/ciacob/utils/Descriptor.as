@@ -53,9 +53,7 @@ package ro.ciacob.utils {
 		 * are both accepted (the former compares "greater than" the later). Also, the two string operands
 		 * need not use the same format either.
 		 * 
-		 * NOTES: This method is meant to effectivelly replace `Descriptor.compareThreePartVersions()`, which
-		 * 		  might be kept around as a alias.
-		 * 		  This method is meant to be used as an argument for the Array.sort() method.
+		 * NOTES: This method is meant to be used as an argument for the Array.sort() method.
 		 *
 		 * @param a
 		 * 		  First multi-part numeric string to compare.
@@ -93,10 +91,11 @@ package ro.ciacob.utils {
 			// Compare
 			var maxLength : uint = Math.max (numASegments, numBSegments);
 			var i:int = 0;
-			
+			var rawASegment : String;
+			var rawBSegment : String;
 			for (i; i < maxLength; i++) {
-				var rawASegment : String = (aSegments[i] as String);
-				var rawBSegment : String = (bSegments[i] as String);
+				rawASegment = (aSegments[i] as String);
+				rawBSegment = (bSegments[i] as String);
 				var aSegment : int = (parseInt (rawASegment) as int);
 				var bSegment : int = (parseInt (rawBSegment) as int);
 				var delta : int = (aSegment - bSegment);
