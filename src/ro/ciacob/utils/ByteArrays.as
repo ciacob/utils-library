@@ -25,7 +25,7 @@ package ro.ciacob.utils {
 			if (toFind == null) {
 				// ** type of pattern unsupported **
 				throw new Error("Unsupported Pattern");
-				return;
+				return -1;
 			}
 
 			a = toFind.length;
@@ -80,7 +80,7 @@ package ro.ciacob.utils {
 			if (toFind == null) {
 				// ** type of pattern unsupported **
 				throw new Error("Unsupported Pattern");
-				return;
+				return [];
 			}
 			var i:int = indexOf(target, toFind, fromIndex);
 			while (i != -1) {
