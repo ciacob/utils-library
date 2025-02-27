@@ -680,7 +680,7 @@ package ro.ciacob.utils {
 			if (p_string == null) {
 				return false;
 			}
-			var regx:RegExp = /^[-+]?\d*\.?\d+(?:[eE][-+]?\d+)?$/;
+			var regx:RegExp = /^[-+]?\d*[\.,]?\d+(?:[eE][-+]?\d+)?$/;
 			return regx.test(p_string);
 		}
 
